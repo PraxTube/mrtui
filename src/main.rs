@@ -121,7 +121,7 @@ fn print_fee(fees: FeeRecommendation) {
 }
 
 fn print_block(block: BlockData) {
-    println!("{}", render_box(16, 10, block));
+    println!("{}", render_box(15, 10, block));
 }
 
 async fn do_fee() -> Result<(), Box<dyn std::error::Error>> {
@@ -172,6 +172,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+fn write_row(message: &mut Vec<Vec<char>>, row: usize, content: &str) {
+    let width = message[0].len();
+    if width - 2 < content.chars().count() {
+        panic!("Width is too small.");
+    }
+
+    let mut index = width / 2 - div_up(content.chars().count(), 2);
+
+    for char in content.chars() {
+        index += 1;
+        message[row][index] = char;
+    }
+}
+
 fn render_box(width: usize, height: usize, block: BlockData) -> String {
     if width < 2 || height < 2 {
         panic!("Width and height must be at least 2.");
@@ -183,6 +197,9 @@ fn render_box(width: usize, height: usize, block: BlockData) -> String {
 
     let title_start_index = width / 2 - div_up(bheight.len(), 2);
     let mut result = String::new();
+    let mut message = vec![vec![' '; width]; height];
+
+    write_row(&mut message, 3, &format!("{}", block.size));
 
     // Top border
     result.push('╭');
@@ -197,10 +214,10 @@ fn render_box(width: usize, height: usize, block: BlockData) -> String {
     result.push('\n');
 
     // Middle rows
-    for _ in 1..height - 1 {
+    for i in 1..height - 1 {
         result.push('│');
-        for _ in 1..width - 1 {
-            result.push(' ');
+        for j in 1..width - 1 {
+            result.push(message[i][j]);
         }
         result.push('│');
         result.push('\n');
