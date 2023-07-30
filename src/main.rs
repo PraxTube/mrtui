@@ -9,7 +9,8 @@ mod utils;
 
 use utils::div_up;
 
-const MOCK_DATA: bool = false;
+const MOCK_DATA: bool = true;
+const BLOCK_FILL_COLOR_INDEX: u8 = 69;
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 struct FeeRecommendation {
@@ -240,6 +241,7 @@ fn render_box(width: usize, height: usize, block: BlockData) -> String {
     let title_start_index = width / 2 - div_up(bheight.len(), 2);
     let mut result = String::new();
     let mut message = vec![vec![' '; width]; height];
+    let block_fill = block.weight as f32 / 4_000_000 as f32;
 
     write_row(
         &mut message,
@@ -264,8 +266,18 @@ fn render_box(width: usize, height: usize, block: BlockData) -> String {
     // Middle rows
     for i in 1..height - 1 {
         result.push('│');
+
         for j in 1..width - 1 {
-            result.push(message[i][j]);
+            let percentage = 1.0 - i as f32 / height as f32;
+            if block_fill > percentage {
+                let content = format!(
+                    "\x1b[48;5;{}m{}\x1b[49m",
+                    BLOCK_FILL_COLOR_INDEX, message[i][j]
+                );
+                result += &content;
+            } else {
+                result.push(message[i][j]);
+            }
         }
         result.push('│');
         result.push('\n');
