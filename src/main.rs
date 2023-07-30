@@ -1,9 +1,15 @@
-use reqwest::{self, Response};
+use std::fs::File;
+use std::io::Read;
+use std::panic;
+
+use reqwest::{self};
 use serde;
 
 mod utils;
 
 use utils::div_up;
+
+const MOCK_DATA: bool = true;
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 struct FeeRecommendation {
@@ -86,22 +92,6 @@ fn stylize_string(input_str: &str) -> String {
     output_str
 }
 
-fn positive_response(response: &Response) -> bool {
-    match response.status() {
-        reqwest::StatusCode::OK => return true,
-        reqwest::StatusCode::UNAUTHORIZED => {
-            println!("Unauthorized...");
-        }
-        reqwest::StatusCode::TOO_MANY_REQUESTS => {
-            println!("Exceeded rate limits, too many requests.");
-        }
-        _ => {
-            panic!("Not known error happend.");
-        }
-    }
-    false
-}
-
 fn print_fee(fees: FeeRecommendation) {
     let fee_str = stylize_string(&format!(
         "Fees in sats/vB\n\
@@ -124,44 +114,91 @@ fn print_block(block: BlockData) {
     println!("{}", render_box(15, 10, block));
 }
 
+async fn fetch_data<T>(endpoint_url: &str, mock_url: &str) -> T
+where
+    T: serde::de::DeserializeOwned,
+{
+    if MOCK_DATA {
+        let mut file = match File::open(mock_url) {
+            Ok(file) => file,
+            Err(err) => panic!("Could not open file {}", err),
+        };
+        let mut contents = String::new();
+        let _ = file.read_to_string(&mut contents);
+
+        match serde_json::from_str(&contents) {
+            Ok(parsed) => return parsed,
+            Err(err) => panic!("Failed to parse JSON: {}", err),
+        }
+    }
+
+    println!("Fetching data...");
+    let response = match reqwest::get(endpoint_url).await {
+        Ok(result) => result,
+        Err(err) => panic!("Couldn't fetch data from url {}", err),
+    };
+
+    match response.status() {
+        reqwest::StatusCode::OK => match response.json::<T>().await {
+            Ok(parsed) => parsed,
+            Err(err) => panic!("MISMATCH, shapes don't match, {}", err),
+        },
+        reqwest::StatusCode::UNAUTHORIZED => {
+            panic!("Unauthorized...");
+        }
+        reqwest::StatusCode::TOO_MANY_REQUESTS => {
+            panic!("Exceeded rate limits, too many requests.");
+        }
+        _ => {
+            panic!("Not known error happend.");
+        }
+    }
+}
+
 async fn do_fee() -> Result<(), Box<dyn std::error::Error>> {
     let endpoint_url = "https://mempool.space/api/v1/fees/recommended";
-    println!("Fetching data...");
-    let response = reqwest::get(endpoint_url).await?;
-
-    if positive_response(&response) {
-        match response.json::<FeeRecommendation>().await {
-            Ok(parsed) => print_fee(parsed),
-            Err(err) => println!("MISMATCH, didn't match expected shape.\n{}", err),
-        };
-    }
+    let mock_url = "mock_data/fee.json";
+    print_fee(fetch_data::<FeeRecommendation>(endpoint_url, mock_url).await);
     Ok(())
 }
 
 async fn get_hash() -> Result<String, Box<dyn std::error::Error>> {
-    let endpoint_hash = "https://mempool.space/api/blocks/tip/hash";
-    println!("Fetching data...");
-    let response = reqwest::get(endpoint_hash).await?;
-
-    if positive_response(&response) {
-        let hash = response.text().await?;
-        return Ok(hash);
+    if MOCK_DATA {
+        let mut file = File::open("mock_data/hash.txt")?;
+        let mut contents = String::new();
+        file.read_to_string(&mut contents)?;
+        return Ok(contents);
     }
-    Ok(String::new())
+
+    let endpoint_url = "https://mempool.space/api/blocks/tip/hash";
+    println!("Fetching data...");
+    let response = match reqwest::get(endpoint_url).await {
+        Ok(result) => result,
+        Err(err) => panic!("Couldn't fetch data from url {}", err),
+    };
+
+    match response.status() {
+        reqwest::StatusCode::OK => match response.text().await {
+            Ok(hash) => Ok(hash),
+            Err(err) => panic!("Couldn't get text from hash {}", err),
+        },
+        reqwest::StatusCode::UNAUTHORIZED => {
+            panic!("Unauthorized...");
+        }
+        reqwest::StatusCode::TOO_MANY_REQUESTS => {
+            panic!("Exceeded rate limits, too many requests.");
+        }
+        _ => {
+            panic!("Not known error happend.");
+        }
+    }
 }
 
 async fn do_block() -> Result<(), Box<dyn std::error::Error>> {
     let hash = get_hash().await?;
     let endpoint_url = "https://mempool.space/api/block/".to_string() + &hash;
-    println!("Fetching data...");
-    let response = reqwest::get(endpoint_url).await?;
-
-    if positive_response(&response) {
-        match response.json::<BlockData>().await {
-            Ok(parsed) => print_block(parsed),
-            Err(err) => println!("MISTMATCH, didn't match the shape expected.\n{}", err),
-        };
-    }
+    let mock_url = "mock_data/block.json";
+    print_block(fetch_data::<BlockData>(&endpoint_url, mock_url).await);
     Ok(())
 }
 
