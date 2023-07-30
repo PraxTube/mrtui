@@ -9,7 +9,7 @@ mod utils;
 
 use utils::div_up;
 
-const MOCK_DATA: bool = true;
+const MOCK_DATA: bool = false;
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 struct FeeRecommendation {
@@ -111,7 +111,7 @@ fn print_fee(fees: FeeRecommendation) {
 }
 
 fn print_block(block: BlockData) {
-    println!("{}", render_box(15, 10, block));
+    println!("{}", render_box(20, 10, block));
 }
 
 async fn fetch_data<T>(endpoint_url: &str, mock_url: &str) -> T
@@ -209,17 +209,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn write_row(message: &mut Vec<Vec<char>>, row: usize, content: &str) {
+fn write_row(message: &mut Vec<Vec<char>>, row: i32, content: &str) {
     let width = message[0].len();
     if width - 2 < content.chars().count() {
         panic!("Width is too small.");
     }
 
-    let mut index = width / 2 - div_up(content.chars().count(), 2);
+    let row: usize = match row < 0 {
+        true => message.len() - row.wrapping_abs() as usize,
+        false => row.wrapping_abs() as usize,
+    };
+
+    let mut index = div_up(width, 2) - div_up(content.chars().count(), 2);
 
     for char in content.chars() {
-        index += 1;
         message[row][index] = char;
+        index += 1;
     }
 }
 
@@ -236,7 +241,13 @@ fn render_box(width: usize, height: usize, block: BlockData) -> String {
     let mut result = String::new();
     let mut message = vec![vec![' '; width]; height];
 
-    write_row(&mut message, 3, &format!("{}", block.size));
+    write_row(
+        &mut message,
+        3,
+        &format!("{}", utils::format_number_bytes(block.size)),
+    );
+    write_row(&mut message, 4, &format!("{} txs", block.tx_count));
+    write_row(&mut message, -2, &utils::minute_difference(block.timestamp));
 
     // Top border
     result.push('╭');
