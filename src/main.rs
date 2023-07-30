@@ -1,6 +1,10 @@
 use reqwest::{self, Response};
 use serde;
 
+mod utils;
+
+use utils::div_up;
+
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 struct FeeRecommendation {
     #[serde(rename = "fastestFee")]
@@ -117,7 +121,7 @@ fn print_fee(fees: FeeRecommendation) {
 }
 
 fn print_block(block: BlockData) {
-    println!("{}", block.height);
+    println!("{}", render_box(16, 10, block));
 }
 
 async fn do_fee() -> Result<(), Box<dyn std::error::Error>> {
@@ -166,4 +170,48 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     do_fee().await?;
     do_block().await?;
     Ok(())
+}
+
+fn render_box(width: usize, height: usize, block: BlockData) -> String {
+    if width < 2 || height < 2 {
+        panic!("Width and height must be at least 2.");
+    }
+    let bheight = block.height.to_string().into_bytes();
+    if width < bheight.len() + 2 {
+        panic!("Width must be bigger then the number of digits in block height");
+    }
+
+    let title_start_index = width / 2 - div_up(bheight.len(), 2);
+    let mut result = String::new();
+
+    // Top border
+    result.push('╭');
+    for i in 1..width - 1 {
+        if i >= title_start_index && i < title_start_index + bheight.len() {
+            result.push(bheight[i - title_start_index] as char);
+        } else {
+            result.push('─');
+        }
+    }
+    result.push('╮');
+    result.push('\n');
+
+    // Middle rows
+    for _ in 1..height - 1 {
+        result.push('│');
+        for _ in 1..width - 1 {
+            result.push(' ');
+        }
+        result.push('│');
+        result.push('\n');
+    }
+
+    // Bottom border
+    result.push('╰');
+    for _ in 1..width - 1 {
+        result.push('─');
+    }
+    result.push('╯');
+
+    result
 }
