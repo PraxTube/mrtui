@@ -1,5 +1,10 @@
-use reqwest::{self};
+use std::sync::mpsc;
+use std::thread;
+
+use reqwest;
 use serde;
+
+use crate::ui::inout;
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 pub struct FeeRecommendation {
@@ -32,16 +37,32 @@ pub struct BlockData {
     pub difficulty: u64,
 }
 
+async fn fetch_response(endpoint_url: &str) -> reqwest::Response {
+    let (tx, rx) = mpsc::channel::<bool>();
+    let loading_thread = thread::Builder::new()
+        .name("loading-animation".into())
+        .spawn(move || inout::loading_animation(rx))
+        .unwrap();
+
+    let response = match reqwest::get(endpoint_url).await {
+        Ok(result) => result,
+        Err(err) => {
+            tx.send(true).expect("Couldn't send tx.");
+            loading_thread.join().unwrap();
+            panic!("Couldn't fetch data from url {}", err);
+        }
+    };
+
+    tx.send(true).expect("Couldn't send tx.");
+    loading_thread.join().unwrap();
+    response
+}
+
 async fn fetch_data<T>(endpoint_url: &str) -> T
 where
     T: serde::de::DeserializeOwned,
 {
-    println!("Fetching data...");
-    let response = match reqwest::get(endpoint_url).await {
-        Ok(result) => result,
-        Err(err) => panic!("Couldn't fetch data from url {}", err),
-    };
-
+    let response = fetch_response(endpoint_url).await;
     match response.status() {
         reqwest::StatusCode::OK => match response.json::<T>().await {
             Ok(parsed) => parsed,
@@ -66,11 +87,7 @@ pub async fn fetch_fee() -> FeeRecommendation {
 
 async fn fetch_hash() -> String {
     let endpoint_url = "https://mempool.space/api/blocks/tip/hash";
-    println!("Fetching data...");
-    let response = match reqwest::get(endpoint_url).await {
-        Ok(result) => result,
-        Err(err) => panic!("Couldn't fetch data from url {}", err),
-    };
+    let response = fetch_response(endpoint_url).await;
 
     match response.status() {
         reqwest::StatusCode::OK => match response.text().await {

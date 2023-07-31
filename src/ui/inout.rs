@@ -1,4 +1,7 @@
 use crate::data::{BlockData, FeeRecommendation};
+use std::io::{self, Write};
+use std::sync::mpsc::Receiver;
+use std::time::Duration;
 
 use crate::ui::block;
 
@@ -75,4 +78,22 @@ pub fn print_fee(fees: FeeRecommendation) {
 
 pub fn print_block(block: BlockData) {
     println!("{}", block::render(WIDTH, HEIGHT, block));
+}
+
+pub fn loading_animation(rx: Receiver<bool>) {
+    let frames = vec!["|", "/", "-", "\\"];
+    let mut index = 0;
+
+    loop {
+        match rx.try_recv() {
+            Ok(_) => break,
+            Err(_) => {}
+        };
+        print!("\rFetching data {} ", frames[index]);
+        io::stdout().flush().unwrap();
+        index = (index + 1) % frames.len();
+        std::thread::sleep(Duration::from_millis(100));
+    }
+    print!("\r");
+    io::stdout().flush().unwrap();
 }
