@@ -1,7 +1,19 @@
 [package]
-name = "mem-tui"
+name = "mrtui"
 version = "0.1.0"
 edition = "2021"
+
+authors = ["PraxTube"]
+description = "Terminal tool to look up block information from mempool."
+homepage = "https://github.com/PraxTube/mrtui"
+documentation = "https://github.com/PraxTube/mrtui"
+repository = "https://github.com/PraxTube/mrtui"
+readme = "README.md"
+
+license = "MIT"
+
+keywords = ["mempool", "bitcoin", "blockchain", "CLI"]
+categories = ["command-line-interface", "bitcoin", "terminal", "mempool"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
