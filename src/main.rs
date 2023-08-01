@@ -1,7 +1,17 @@
+use clap::Parser;
+
 mod data;
 mod mock_data;
 mod ui;
 mod utils;
+
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// Mock data, used for debugging
+    #[arg(short, long, default_value_t = false)]
+    mock: bool,
+}
 
 fn mock() {
     ui::inout::print_fee(mock_data::fetch_fee());
@@ -12,8 +22,9 @@ fn mock() {
 
 #[tokio::main]
 async fn main() {
-    let mock_data = true;
-    if mock_data {
+    let args = Args::parse();
+
+    if args.mock {
         mock();
         return;
     }
