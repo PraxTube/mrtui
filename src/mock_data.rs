@@ -27,7 +27,7 @@ pub fn fetch_fee() -> FeeRecommendation {
     fetch_data::<FeeRecommendation>(mock_url)
 }
 
-pub fn fetch_block() -> BlockData {
-    let mock_url = "mock_data/block.json";
-    fetch_data::<BlockData>(mock_url)
+pub fn fetch_blocks() -> Vec<BlockData> {
+    let mock_url = "mock_data/blocks.json";
+    fetch_data::<Vec<BlockData>>(mock_url)
 }

@@ -49,7 +49,11 @@ pub fn render(width: usize, height: usize, block: &BlockData) -> String {
         5,
         &format!("{}WU", utils::format_number_unit(block.weight)),
     );
-    write_row(&mut message, -2, &utils::minute_difference(block.timestamp));
+    write_row(
+        &mut message,
+        -2,
+        &utils::minute_difference(block.timestamp.into()),
+    );
 
     // Top border
     result.push('╭');
