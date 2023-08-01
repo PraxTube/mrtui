@@ -22,7 +22,7 @@ fn write_row(message: &mut Vec<Vec<char>>, row: i32, content: &str) {
     }
 }
 
-pub fn render(width: usize, height: usize, block: BlockData) -> String {
+pub fn render(width: usize, height: usize, block: &BlockData) -> String {
     if width < 2 || height < 2 {
         panic!("Width and height must be at least 2.");
     }
@@ -33,15 +33,22 @@ pub fn render(width: usize, height: usize, block: BlockData) -> String {
 
     let title_start_index = width / 2 - utils::div_up(bheight.len(), 2);
     let mut result = String::new();
+    // TODO: Fix this size, which is the reason
+    // we get bad positioning (should be smaller then width and height)
     let mut message = vec![vec![' '; width]; height];
     let block_fill = block.weight as f32 / 4_000_000 as f32;
 
     write_row(
         &mut message,
         3,
-        &format!("{}", utils::format_number_bytes(block.size)),
+        &format!("{}B", utils::format_number_unit(block.size)),
     );
     write_row(&mut message, 4, &format!("{} txs", block.tx_count));
+    write_row(
+        &mut message,
+        5,
+        &format!("{}WU", utils::format_number_unit(block.weight)),
+    );
     write_row(&mut message, -2, &utils::minute_difference(block.timestamp));
 
     // Top border
