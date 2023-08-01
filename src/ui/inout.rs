@@ -9,6 +9,8 @@ use crate::ui::block;
 
 const WIDTH: usize = 20;
 const HEIGHT: usize = 10;
+const HFILL: &str = "     ";
+
 const DIFFICULTY_ADJUSTMENT: u32 = 2016;
 const HALVING: u32 = 210_000;
 
@@ -99,9 +101,42 @@ pub fn print_fee(fees: FeeRecommendation) {
 }
 
 pub fn print_blocks(blocks: &Vec<BlockData>) {
-    for block in blocks {
-        println!("{}", block::render(WIDTH, HEIGHT, block));
+    let blocks_str: Vec<Vec<String>> = blocks
+        .iter()
+        .map(|b| block::render(WIDTH, HEIGHT, b))
+        .collect();
+
+    let mut first_result: Vec<String> = vec![String::new(); blocks_str[0].len()];
+
+    for i in 0..blocks_str[0].len() {
+        let mut row = String::new();
+        for k in 0..4 {
+            row.push_str(&blocks_str[k][i]);
+            row.push_str(HFILL);
+        }
+        first_result[i].push_str(&row);
     }
+
+    let mut second_result: Vec<String> = vec![String::new(); blocks_str[0].len()];
+
+    for i in 0..blocks_str[0].len() {
+        let mut row = String::new();
+        for k in 4..8 {
+            row.push_str(&blocks_str[k][i]);
+            row.push_str(HFILL);
+        }
+        second_result[i].push_str(&row);
+    }
+
+    println!();
+    for line in first_result {
+        println!("{}", line);
+    }
+    println!();
+    for line in second_result {
+        println!("{}", line);
+    }
+    println!();
 }
 
 pub fn print_difficulty(block: &BlockData) {

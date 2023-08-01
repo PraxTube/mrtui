@@ -12,7 +12,7 @@ fn mock() {
 
 #[tokio::main]
 async fn main() {
-    let mock_data = true;
+    let mock_data = false;
     if mock_data {
         mock();
         return;

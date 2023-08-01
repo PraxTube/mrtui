@@ -22,7 +22,7 @@ fn write_row(message: &mut Vec<Vec<char>>, row: i32, content: &str) {
     }
 }
 
-pub fn render(width: usize, height: usize, block: &BlockData) -> String {
+pub fn render(width: usize, height: usize, block: &BlockData) -> Vec<String> {
     if width < 2 || height < 2 {
         panic!("Width and height must be at least 2.");
     }
@@ -32,7 +32,7 @@ pub fn render(width: usize, height: usize, block: &BlockData) -> String {
     }
 
     let title_start_index = width / 2 - utils::div_up(bheight.len(), 2);
-    let mut result = String::new();
+    let mut result: Vec<String> = Vec::new();
     // TODO: Fix this size, which is the reason
     // we get bad positioning (should be smaller then width and height)
     let mut message = vec![vec![' '; width]; height];
@@ -56,20 +56,21 @@ pub fn render(width: usize, height: usize, block: &BlockData) -> String {
     );
 
     // Top border
-    result.push('╭');
+    result.push(String::new());
+    result[0].push('╭');
     for i in 1..width - 1 {
         if i >= title_start_index && i < title_start_index + bheight.len() {
-            result.push(bheight[i - title_start_index] as char);
+            result[0].push(bheight[i - title_start_index] as char);
         } else {
-            result.push('─');
+            result[0].push('─');
         }
     }
-    result.push('╮');
-    result.push('\n');
+    result[0].push('╮');
 
     // Middle rows
     for i in 1..height - 1 {
-        result.push('│');
+        result.push(String::new());
+        result[i].push('│');
 
         for j in 1..width - 1 {
             let percentage = 1.0 - i as f32 / height as f32;
@@ -78,21 +79,21 @@ pub fn render(width: usize, height: usize, block: &BlockData) -> String {
                     "\x1b[48;5;{}m{}\x1b[49m",
                     BLOCK_FILL_COLOR_INDEX, message[i][j]
                 );
-                result += &content;
+                result[i] += &content;
             } else {
-                result.push(message[i][j]);
+                result[i].push(message[i][j]);
             }
         }
-        result.push('│');
-        result.push('\n');
+        result[i].push('│');
     }
 
     // Bottom border
-    result.push('╰');
+    result.push(String::new());
+    result[height - 1].push('╰');
     for _ in 1..width - 1 {
-        result.push('─');
+        result[height - 1].push('─');
     }
-    result.push('╯');
+    result[height - 1].push('╯');
 
     result
 }
