@@ -25,6 +25,21 @@ pub fn format_number_unit(number: u32) -> String {
     return format!("{}", number as f32);
 }
 
+pub fn format_number_kilo(number: u32, separator: &str) -> String {
+    format!(
+        "{}",
+        number
+            .to_string()
+            .as_bytes()
+            .rchunks(3)
+            .rev()
+            .map(std::str::from_utf8)
+            .collect::<Result<Vec<&str>, _>>()
+            .unwrap()
+            .join(separator)
+    )
+}
+
 pub fn format_time(seconds: u64) -> String {
     let year_div = 365 * 24 * 60 * 60;
     let month_div = 30 * 24 * 60 * 60;

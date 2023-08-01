@@ -92,8 +92,8 @@ pub fn print_fee(fees: FeeRecommendation) {
     let expected_fee = stylize_string(&format!(
         "\nExpected fees in sats:\n\
             [color=#BF0000]High end:[/color] {}, [color=#009F4F]Low end:[/color] {}",
-        fees.fastest_fee * 600,
-        fees.minimum_fee * 200
+        utils::format_number_kilo(fees.fastest_fee * 600, "_"),
+        utils::format_number_kilo(fees.minimum_fee * 200, "_"),
     ));
     println!("{}", expected_fee);
 }

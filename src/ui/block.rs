@@ -26,7 +26,7 @@ pub fn render(width: usize, height: usize, block: &BlockData) -> String {
     if width < 2 || height < 2 {
         panic!("Width and height must be at least 2.");
     }
-    let bheight = block.height.to_string().into_bytes();
+    let bheight = utils::format_number_kilo(block.height, "_").into_bytes();
     if width < bheight.len() + 2 {
         panic!("Width must be bigger then the number of digits in block height");
     }
