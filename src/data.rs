@@ -6,20 +6,6 @@ use serde;
 
 use crate::ui::inout;
 
-#[derive(Debug, serde::Deserialize, serde::Serialize)]
-pub struct FeeRecommendation {
-    #[serde(rename = "fastestFee")]
-    pub fastest_fee: u32,
-    #[serde(rename = "halfHourFee")]
-    pub half_hour_fee: u32,
-    #[serde(rename = "hourFee")]
-    pub hour_fee: u32,
-    #[serde(rename = "economyFee")]
-    pub economy_fee: u32,
-    #[serde(rename = "minimumFee")]
-    pub minimum_fee: u32,
-}
-
 #[derive(Debug, serde::Deserialize)]
 pub struct BlockData {
     pub id: String,
@@ -145,11 +131,6 @@ where
             panic!("Not known error happend.");
         }
     }
-}
-
-pub async fn fetch_fee() -> FeeRecommendation {
-    let endpoint_url = "https://mempool.space/api/v1/fees/recommended";
-    fetch_data::<FeeRecommendation>(endpoint_url).await
 }
 
 pub async fn fetch_blocks(block_height: Option<usize>) -> Vec<BlockData> {

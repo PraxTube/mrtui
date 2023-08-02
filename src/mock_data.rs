@@ -3,7 +3,7 @@ use std::io::Read;
 
 use serde;
 
-use crate::data::{BlockData, FeeRecommendation};
+use crate::data::BlockData;
 
 fn fetch_data<T>(mock_url: &str) -> T
 where
@@ -20,11 +20,6 @@ where
         Ok(parsed) => return parsed,
         Err(err) => panic!("Failed to parse JSON: {}", err),
     }
-}
-
-pub fn fetch_fee() -> FeeRecommendation {
-    let mock_url = "mock_data/fee.json";
-    fetch_data::<FeeRecommendation>(mock_url)
 }
 
 pub fn fetch_blocks() -> Vec<BlockData> {

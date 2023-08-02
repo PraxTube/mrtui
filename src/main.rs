@@ -14,7 +14,6 @@ struct Args {
 }
 
 fn mock() {
-    ui::inout::print_fee(mock_data::fetch_fee());
     ui::inout::print_blocks(&mock_data::fetch_blocks());
     ui::inout::print_difficulty(&mock_data::fetch_blocks()[0]);
     ui::inout::print_halving(&mock_data::fetch_blocks()[0]);
@@ -29,9 +28,7 @@ async fn main() {
         return;
     }
 
-    let fees = data::fetch_fee().await;
     let blocks = data::fetch_blocks(None).await;
-    ui::inout::print_fee(fees);
     ui::inout::print_blocks(&blocks);
     ui::inout::print_difficulty(&blocks[0]);
     ui::inout::print_halving(&blocks[0]);

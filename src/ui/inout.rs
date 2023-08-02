@@ -1,4 +1,4 @@
-use crate::data::{BlockData, FeeRecommendation};
+use crate::data::BlockData;
 use crate::utils;
 use std::io::{self, Write};
 use std::sync::mpsc::Receiver;
@@ -6,7 +6,6 @@ use std::time::Duration;
 
 use crate::ui::bar;
 use crate::ui::block;
-use crate::ui::utils::stylize_string;
 
 const WIDTH: usize = 20;
 const HEIGHT: usize = 10;
@@ -31,24 +30,6 @@ pub fn loading_animation(rx: Receiver<bool>) {
     }
     print!("\r");
     io::stdout().flush().unwrap();
-}
-
-pub fn print_fee(fees: FeeRecommendation) {
-    let fee_str = stylize_string(&format!(
-        "Fees in sats/vB\n\
-            [color=#BF0000]\u{2191} High:[/color] {}, \
-            \u{2248} Medium: {}, \
-            [color=#009F4F]\u{2193} Low:[/color] {}",
-        fees.fastest_fee, fees.hour_fee, fees.minimum_fee
-    ));
-    println!("{}", fee_str);
-    let expected_fee = stylize_string(&format!(
-        "\nExpected fees in sats:\n\
-            [color=#BF0000]High end:[/color] {}, [color=#009F4F]Low end:[/color] {}",
-        utils::format_number_kilo(fees.fastest_fee * 140 * 3, "_"),
-        utils::format_number_kilo(fees.minimum_fee * 140, "_"),
-    ));
-    println!("{}", expected_fee);
 }
 
 pub fn print_blocks(blocks: &Vec<BlockData>) {
@@ -91,13 +72,13 @@ pub fn print_blocks(blocks: &Vec<BlockData>) {
 }
 
 pub fn print_difficulty(block: &BlockData) {
-    let width = 50;
+    let width = 40;
     let height = 1;
     let seconds_till_adjustment =
         (DIFFICULTY_ADJUSTMENT - block.height % DIFFICULTY_ADJUSTMENT) as u64 * 10 * 60;
     let progress = (block.height % DIFFICULTY_ADJUSTMENT) as f64 / DIFFICULTY_ADJUSTMENT as f64;
     let title = format!(
-        "Difficulty Adjustment in: {}, {:.0}%",
+        "Difficulty Adj. in: {}, {:.0}%",
         utils::format_time(seconds_till_adjustment),
         progress * 100.0
     );
@@ -108,7 +89,7 @@ pub fn print_difficulty(block: &BlockData) {
 
 pub fn print_halving(block: &BlockData) {
     let seconds_till_halving = (HALVING - block.height % HALVING) as u64 * 10 * 60;
-    let width = 50;
+    let width = 40;
     let height = 1;
     let progress = (block.height % HALVING) as f64 / HALVING as f64;
     let title = format!(
