@@ -15,6 +15,7 @@ const DIFFICULTY_ADJUSTMENT: u32 = 2016;
 const HALVING: u32 = 210_000;
 
 pub fn loading_animation(rx: Receiver<bool>) {
+    let char_length = 15;
     let frames = vec!["|", "/", "-", "\\"];
     let mut index = 0;
 
@@ -23,12 +24,12 @@ pub fn loading_animation(rx: Receiver<bool>) {
             Ok(_) => break,
             Err(_) => {}
         };
-        print!("\rFetching data {} ", frames[index]);
+        print!("\rFetching data {}", frames[index]);
         io::stdout().flush().unwrap();
         index = (index + 1) % frames.len();
         std::thread::sleep(Duration::from_millis(100));
     }
-    print!("\r");
+    print!("\r{}{}", " ".repeat(char_length), "\r");
     io::stdout().flush().unwrap();
 }
 
