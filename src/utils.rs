@@ -72,3 +72,7 @@ pub fn minute_difference(block_timestamp: u64) -> String {
 
     format!("{} ago", time)
 }
+
+pub fn split_strings_by_newline(input: &str) -> Vec<String> {
+    input.split('\n').map(|s| s.to_string()).collect()
+}
