@@ -54,7 +54,7 @@ pub fn print_fee(fees: FeeRecommendation) {
 pub fn print_blocks(blocks: &Vec<BlockData>) {
     let blocks_str: Vec<Vec<String>> = blocks
         .iter()
-        .map(|b| block::render(WIDTH, HEIGHT, b))
+        .map(|b| block::render_block(WIDTH, HEIGHT, b))
         .collect();
 
     let mut first_result: Vec<String> = vec![String::new(); blocks_str[0].len()];

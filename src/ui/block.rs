@@ -15,6 +15,11 @@ fn write_row(message: &mut Vec<Vec<char>>, row: i32, content: &str) {
         true => message.len() - row.wrapping_abs() as usize,
         false => row.wrapping_abs() as usize,
     };
+    let row = if row >= message.len() {
+        message.len() - 2
+    } else {
+        row
+    };
 
     let mut index = utils::div_up(width, 2) - utils::div_up(content.chars().count(), 2);
 
@@ -24,7 +29,7 @@ fn write_row(message: &mut Vec<Vec<char>>, row: i32, content: &str) {
     }
 }
 
-pub fn render(width: usize, height: usize, block: &BlockData) -> Vec<String> {
+pub fn render_block(width: usize, height: usize, block: &BlockData) -> Vec<String> {
     if width < 2 || height < 2 {
         panic!("Width and height must be at least 2.");
     }
@@ -61,7 +66,12 @@ pub fn render(width: usize, height: usize, block: &BlockData) -> Vec<String> {
         4,
         &format!("{}B", utils::format_number_unit(block.size)),
     );
-    write_row(&mut message, 5, &format!("{} txs", block.tx_count));
+    write_row(
+        &mut message,
+        5,
+        &format!("{} txs", utils::format_number_kilo(block.tx_count, ",")),
+    );
+    write_row(&mut message, 6, &format!("{}", block.extras.pool.name));
     write_row(
         &mut message,
         -2,

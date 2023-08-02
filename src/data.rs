@@ -113,11 +113,14 @@ async fn fetch_response(endpoint_url: &str) -> reqwest::Response {
         Err(err) => {
             tx.send(true).expect("Couldn't send tx.");
             loading_thread.join().unwrap();
-            panic!("Couldn't fetch data from url {}", err);
+            panic!(
+                "couldn't fetch data from url, most likely timed out\n{}",
+                err
+            );
         }
     };
 
-    tx.send(true).expect("Couldn't send tx.");
+    tx.send(true).expect("couldn't send tx to rx");
     loading_thread.join().unwrap();
     response
 }
