@@ -87,6 +87,31 @@ pub struct Pool {
     pub slug: String,
 }
 
+#[derive(Debug, serde::Deserialize)]
+pub struct HashrateData {
+    pub hashrates: Vec<HashrateEntry>,
+    pub difficulty: Vec<DifficultyEntry>,
+    #[serde(rename = "currentHashrate")]
+    pub current_hashrate: u128,
+    #[serde(rename = "currentDifficulty")]
+    pub current_difficulty: f64,
+}
+
+#[derive(Debug, serde::Deserialize)]
+pub struct HashrateEntry {
+    pub timestamp: u64,
+    #[serde(rename = "avgHashrate")]
+    pub avg_hashrate: u128,
+}
+
+#[derive(Debug, serde::Deserialize)]
+pub struct DifficultyEntry {
+    pub time: u64,
+    pub height: u64,
+    pub difficulty: f64,
+    pub adjustment: f64,
+}
+
 async fn fetch_response(endpoint_url: &str) -> reqwest::Response {
     let (tx, rx) = mpsc::channel::<bool>();
     let loading_thread = thread::Builder::new()
@@ -142,4 +167,9 @@ pub async fn fetch_blocks(block_height: Option<usize>) -> Vec<BlockData> {
         None => "https://mempool.space/api/v1/blocks".to_string(),
     };
     fetch_data::<Vec<BlockData>>(&endpoint_url).await
+}
+
+pub async fn fetch_hashrate() -> HashrateData {
+    let endpoint_url = "https://mempool.space/api/v1/mining/hashrate/3m";
+    fetch_data::<HashrateData>(&endpoint_url).await
 }

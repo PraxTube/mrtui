@@ -3,7 +3,7 @@ use std::io::Read;
 
 use serde;
 
-use crate::data::BlockData;
+use crate::data::{BlockData, HashrateData};
 
 fn fetch_data<T>(mock_url: &str) -> T
 where
@@ -25,4 +25,9 @@ where
 pub fn fetch_blocks() -> Vec<BlockData> {
     let mock_url = "mock_data/blocks.json";
     fetch_data::<Vec<BlockData>>(mock_url)
+}
+
+pub fn fetch_hashrate() -> HashrateData {
+    let mock_url = "mock_data/hashrate.json";
+    fetch_data::<HashrateData>(mock_url)
 }

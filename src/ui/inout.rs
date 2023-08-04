@@ -1,4 +1,4 @@
-use crate::data::BlockData;
+use crate::data::{BlockData, HashrateData};
 use crate::utils;
 use std::io::{self, Write};
 use std::sync::mpsc::Receiver;
@@ -6,6 +6,7 @@ use std::time::Duration;
 
 use crate::ui::bar;
 use crate::ui::block;
+use crate::ui::plot;
 use crate::ui::utils::concat_strings;
 
 const WIDTH: usize = 20;
@@ -75,4 +76,8 @@ pub fn print_halving(block: &BlockData) {
         "{}",
         concat_strings(vec![box_halving, box_difficulty], HFILL)
     );
+}
+
+pub fn print_hashrate(hashrate: &HashrateData) {
+    plot::hashrate(hashrate);
 }
