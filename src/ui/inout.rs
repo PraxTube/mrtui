@@ -8,6 +8,7 @@ use crate::ui::bar;
 use crate::ui::block;
 use crate::ui::plot;
 use crate::ui::utils::concat_strings;
+use crate::ui::utils::stylize_string;
 
 const WIDTH: usize = 20;
 const HEIGHT: usize = 10;
@@ -79,5 +80,9 @@ pub fn print_halving(block: &BlockData) {
 }
 
 pub fn print_hashrate(hashrate: &HashrateData) {
+    println!(
+        "{}",
+        stylize_string("                               [bold]Hashrate in EH/s[/bold] (10^18)")
+    );
     plot::hashrate(hashrate);
 }
